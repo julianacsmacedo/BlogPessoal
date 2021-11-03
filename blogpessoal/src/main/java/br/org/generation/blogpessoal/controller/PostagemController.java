@@ -39,31 +39,43 @@ public class PostagemController {
 	public ResponseEntity<Postagem> getById(@PathVariable long id) 
 	{
 		return postagemRepository.findById(id)
-			.map(resp -> ResponseEntity.ok(resp))
+			.map(resposta -> ResponseEntity.ok(resposta))
 			.orElse(ResponseEntity.notFound().build());
 	}
 	
 	//Consulta por titulo
 	@GetMapping("/titulo/{titulo}")
-	public ResponseEntity<List<Postagem>> getByTitulo(@PathVariable String titulo){
+	public ResponseEntity<List<Postagem>> getByTitulo(@PathVariable String titulo)
+	{
 		return ResponseEntity.ok(postagemRepository.findAllByTituloContainingIgnoreCase(titulo));
 	}
 	
 	//Cria uma nova postagem
 	@PostMapping
-	public ResponseEntity<Postagem> postPostagem (@RequestBody Postagem postagem){
+	public ResponseEntity<Postagem> postPostagem (@RequestBody Postagem postagem)
+	{
 		return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem));
 	}
 	
+	//Atualiza, caso o recurso não exista retorna um notFound
 	@PutMapping
-	public ResponseEntity<Postagem> putPostagem (@RequestBody Postagem postagem){
-		return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem));
+	public ResponseEntity<Postagem> putPostagem (@RequestBody Postagem postagem)
+	{
+		return postagemRepository.findById(postagem.getId())
+                .map(resposta -> ResponseEntity.ok(postagemRepository.save(postagem)))
+                .orElse(ResponseEntity.notFound().build());
 	}
 			
-	//Deleta
+	//Deleta um id que existe, caso o recurso não exista retorna um notFound
 	@DeleteMapping("/{id}")
-	public void deletePostagem(@PathVariable long id) {
-		postagemRepository.deleteById(id);
+	public ResponseEntity<?> deletaPostagem(@PathVariable long id) 
+	{
+		 return  postagemRepository.findById(id)
+				 .map(resposta -> {
+			        	postagemRepository.deleteById(id);
+			            return ResponseEntity.noContent().build();
+			        })
+				 .orElse(ResponseEntity.notFound().build());
 	}	
 
 }
