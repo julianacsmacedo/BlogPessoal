@@ -41,22 +41,25 @@ public class UsuarioService {
 	
 	// Método para Logar/Autenticar o Usuario
 	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin) {
-		
+
 		Optional<Usuario> usuario = usuarioRepository.findByUsuario(usuarioLogin.get().getUsuario());
 		
 		if(usuario.isPresent()) {
-			if (compararSenhas(usuarioLogin.get().getSenha(), usuario.get().getSenha())) {
+			if(compararSenhas(usuarioLogin.get().getSenha(), usuario.get().getSenha())) {
+				
+				String token = gerarBasicToken(usuarioLogin.get().getUsuario(), usuarioLogin.get().getSenha());
 
 				usuarioLogin.get().setId(usuario.get().getId());				
 				usuarioLogin.get().setNome(usuario.get().getNome());
 				usuarioLogin.get().setSenha(usuario.get().getSenha());
-				usuarioLogin.get().setToken(gerarBasicToken(usuarioLogin.get().getUsuario(), usuarioLogin.get().getSenha()));
-
+				usuarioLogin.get().setToken(token);
+				
 				return usuarioLogin;
 			}
 		}
 		
 		return Optional.empty();
+		
 	}
 	
 	// Método para criptografar a senha
